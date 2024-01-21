@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -28,6 +29,8 @@ const (
 )
 
 var (
+	// jobMaxTimeout is the maximum amount of time a Job can run before it is cancelled.
+	jobMaxTimeout = 10 * time.Minute
 	// jobStatusMap is a map of Job IDs to JobStatuses.
 	jobStatusMap = make(map[uuid.UUID]JobStatus)
 	mapMutex     sync.Mutex
@@ -101,6 +104,8 @@ func (j *Job) executeJob() (interface{}, error) {
 		return nil, j.Ctx.Err()
 	case <-done:
 		return result, err
+	case <-time.After(jobMaxTimeout):
+		return nil, ErrJobTimeout
 	}
 }
 
@@ -150,6 +155,9 @@ func (j *Job) Empty() bool {
 func (j *Job) SetStatus(status JobStatus) {
 	mapMutex.Lock()
 	jobStatusMap[j.ID] = status
+	if status == StatusCompleted || status == StatusFailed {
+		delete(jobStatusMap, j.ID)
+	}
 	mapMutex.Unlock()
 }
 

@@ -34,8 +34,10 @@ func (p *WorkerPool) worker() {
 			return
 		default:
 			job, err := p.queue.DequeueJob()
+			if err == ErrQueueClosed {
+				return
+			}
 			if err != nil {
-				// Handle errors here
 				continue
 			}
 			job.Run()
@@ -43,7 +45,7 @@ func (p *WorkerPool) worker() {
 	}
 }
 
-// Close closes the WorkerPool.
+// Close closes the WorkerPool and the queue, and waits for all workers to finish.
 func (p *WorkerPool) Close() {
 	close(p.shutdown)
 	p.queue.Close()

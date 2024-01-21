@@ -196,10 +196,12 @@ func (q *PriorityQueue) Enqueue(job *Job, opts interface{}) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
+	// Wait until there is room in the queue
 	for q.jobs.Len() == q.max && !q.closed {
 		q.cond.Wait()
 	}
 
+	// Panic if the queue is closed
 	if q.closed {
 		panic("sending on closed queue")
 	}
@@ -221,6 +223,7 @@ func (q *PriorityQueue) Dequeue() (*Job, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
+	// Wait until there is a job in the queue
 	for q.jobs.Len() == 0 {
 		if q.closed {
 			return nil, ErrQueueClosed
