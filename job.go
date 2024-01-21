@@ -23,7 +23,7 @@ func NewJob(ctx context.Context, task Task) Job {
 }
 
 func (j Job) Run() {
-	done := make(chan struct{}, 1)
+	done := make(chan bool, 1)
 
 	go func() {
 		defer close(done)

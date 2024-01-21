@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"gitlab.com/emergentmethods/jobq"
@@ -10,7 +11,7 @@ import (
 type HelloTask struct{}
 
 func (t *HelloTask) Execute() (interface{}, error) {
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
 	return "Hello, People!", nil
 }
 
@@ -20,16 +21,18 @@ func main() {
 	pool := jobq.NewWorkerPool(q, 5)
 	defer pool.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	fut, err := q.EnqueueTask(ctx, &HelloTask{})
 	if err != nil {
 		panic(err)
 	}
+
 	result, err := fut.Result()
 	if err != nil {
-		panic(err)
+		fmt.Printf("Task Error: %s\n", err)
+		return
 	}
 	println(result.(string))
 

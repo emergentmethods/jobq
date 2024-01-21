@@ -7,13 +7,13 @@ import (
 type WorkerPool struct {
 	queue    *Queue
 	wg       sync.WaitGroup
-	shutdown chan struct{}
+	shutdown chan bool
 }
 
 func NewWorkerPool(queue *Queue, numWorkers int) *WorkerPool {
 	pool := &WorkerPool{
 		queue:    queue,
-		shutdown: make(chan struct{}),
+		shutdown: make(chan bool, 1),
 	}
 	pool.wg.Add(numWorkers)
 	for i := 0; i < numWorkers; i++ {
