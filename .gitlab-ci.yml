@@ -82,6 +82,8 @@ variables: {}
 # Setup job to install dependencies
 build-env:
   stage: .pre
+  tags:
+    - gitlab-org-docker
   script:
     - go mod download
     # Install go-task
@@ -103,9 +105,10 @@ build-env:
 
 
 lint-commit:
-  <<: *use_cached_venv
   <<: *no_tag
   stage: lint
+  tags:
+    - gitlab-org-docker
   image: python:3.11
   script:
     - |
@@ -128,6 +131,8 @@ lint-commit:
 lint-code:
   <<: *no_tag
   stage: lint
+  tags:
+    - gitlab-org-docker
   script:
       # Ensure the code is formatted correctly
     - task lint
@@ -136,6 +141,8 @@ lint-code:
 unit-tests:
   <<: *no_tag
   stage: test
+  tags:
+    - gitlab-org-docker
   script:
     # Run tests
     - go get github.com/boumenot/gocover-cobertura
@@ -150,6 +157,8 @@ unit-tests:
 
 bump-version:
   <<: *only_protected
+  tags:
+    - gitlab-org-docker
   variables:
     REPO_URL: "https://release-token:${RELEASE_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
   stage: bump
@@ -178,6 +187,8 @@ bump-version:
 get-version:
   <<: *only_tag
   stage: version
+  tags:
+    - gitlab-org-docker
   script:
     # Create release.env
     - echo "VERSION=$(task version)" >> release.env
@@ -188,31 +199,11 @@ get-version:
       dotenv: release.env
 
 
-build-docs:
-  <<: *only_tag
-  stage: build
-  script:
-    - task docs
-  artifacts:
-    paths:
-      - site/
-    expire_in: 1 week
-
-
-build:
-  <<: *only_tag
-  stage: build
-  script:
-    - task build
-  artifacts:
-    paths:
-      - dist/
-    expire_in: 1 week
-
-
 make-release:
   <<: *only_tag
   stage: release
+  tags:
+    - gitlab-org-docker
   needs:
     - job: get-version
       artifacts: true

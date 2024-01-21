@@ -17,10 +17,14 @@ type Task interface {
 type JobStatus string
 
 const (
-	StatusPending   JobStatus = "pending"
-	StatusRunning   JobStatus = "running"
+	// StatusPending is the status of a Job that has not yet been enqueued.
+	StatusPending JobStatus = "pending"
+	// StatusRunning is the status of a Job that is currently running.
+	StatusRunning JobStatus = "running"
+	// StatusCompleted is the status of a Job that has completed successfully.
 	StatusCompleted JobStatus = "completed"
-	StatusFailed    JobStatus = "failed"
+	// StatusFailed is the status of a Job that has failed.
+	StatusFailed JobStatus = "failed"
 )
 
 var (
@@ -40,6 +44,7 @@ type Job struct {
 	retries      int
 }
 
+// JobOptions are options for creating a new Job.
 type JobOptions struct {
 	ID           uuid.UUID
 	Task         Task
@@ -141,7 +146,7 @@ func (j *Job) Empty() bool {
 	return j.Task == nil
 }
 
-// SetJobStatus sets the status of the Job.
+// SetStatus sets the status of the Job.
 func (j *Job) SetStatus(status JobStatus) {
 	mapMutex.Lock()
 	jobStatusMap[j.ID] = status
@@ -174,7 +179,7 @@ func NewJobQueue(opts *JobQueueOptions) (*JobQueue, error) {
 	return &JobQueue{queue: opts.Queue}, nil
 }
 
-// EnqueueTask creates a new Job from the given Task and adds it to the queue.
+// EnqueueJob creates a new Job from the given Task and adds it to the queue.
 func (q *JobQueue) EnqueueJob(opts *JobOptions) (*Future, error) {
 	job, err := NewJob(opts)
 	if err != nil {
@@ -184,7 +189,7 @@ func (q *JobQueue) EnqueueJob(opts *JobOptions) (*Future, error) {
 	return job.Future, nil
 }
 
-// Dequeue removes a Job from the queue.
+// DequeueJob removes a Job from the queue.
 func (q *JobQueue) DequeueJob() (*Job, error) {
 	return q.queue.Dequeue()
 }

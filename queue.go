@@ -53,6 +53,7 @@ func (q *FIFOQueue) Close() {
 	close(q.jobs)
 }
 
+// LIFOQueue is a queue that stores jobs in a Last In First Out order.
 type LIFOQueue struct {
 	jobs   []*Job
 	mu     sync.Mutex
@@ -165,6 +166,7 @@ func (h *PriorityQueueHeap) Pop() interface{} {
 	return item
 }
 
+// PriorityQueueOptions are options used when enqueueing a job in a PriorityQueue.
 type PriorityQueueOptions struct {
 	Priority int
 }
