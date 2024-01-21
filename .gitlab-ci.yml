@@ -70,6 +70,8 @@ before_script:
   image: docker:latest
   services:
     - docker:dind
+  tags:
+    - gitlab-org-docker
   # Deactivate cache for docker jobs
   cache: []
 
@@ -135,16 +137,15 @@ unit-tests:
   <<: *no_tag
   stage: test
   script:
+    # Run tests
+    - go get github.com/boumenot/gocover-cobertura
     - task test
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+    - go run github.com/boumenot/gocover-cobertura < coverage.out > coverage.xml
   artifacts:
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-      junit: report.xml
-    paths:
-      - coverage-report/
 
 
 bump-version:

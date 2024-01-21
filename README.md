@@ -64,7 +64,7 @@ func main() {
     // for the maximum amount of retries means the task will only be attempted once.
     // This allows us to cancel the task via the context and specify how many times it 
     // should be retried if it fails.
-    future, _ := queue.EnqueueJob(&JobOptions{
+    future, _ := queue.EnqueueJob(&jobq.JobOptions{
         Task: &MyTask{},
         Ctx: context.WithTimeout(3*time.Second),
         MaxRetries: 2,
@@ -113,15 +113,13 @@ if err != nil {
 }
 
 // We can set the priority of a job when we enqueue it
-future, _ := queue.EnqueueJob(&JobOptions{
+future, _ := queue.EnqueueJob(&jobq.JobOptions{
     Task: &MyTask{},
     Ctx: context.WithTimeout(3*time.Second),
     MaxRetries: 2,
     ID: uuid.New(),
-    QueueOptions: &PriorityQueueOptions{
+    QueueOptions: &jobq.PriorityQueueOptions{
         Priority: 1,
     },
 })
-```
-
 ```

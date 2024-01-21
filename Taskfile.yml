@@ -50,8 +50,9 @@ tasks:
 
   test-lib:
     desc: Run Go tests
+    deps: [install-devtools]
     cmds:
-      - go test -race -cover -coverprofile=coverage.out ./...
+      - go test -race -cover -coverprofile=coverage.out -covermode atomic ./...
 
   benchmark:
     desc: Run Go benchmarks
