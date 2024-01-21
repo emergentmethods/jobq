@@ -15,14 +15,21 @@ var helloTo HelloTo
 type HelloTask struct{}
 
 func (t *HelloTask) Execute(ctx context.Context) (interface{}, error) {
-	time.Sleep(2 * time.Second)
+	time.Sleep(4 * time.Second)
 	to := ctx.Value(helloTo).(string)
 	return fmt.Sprintf("Hello, %s!", to), nil
 }
 
 func main() {
 	// Create a new in-memory queue
-	q := jobq.NewQueue(10)
+	q, err := jobq.NewJobQueue(
+		&jobq.JobQueueOptions{
+			Queue: jobq.NewFIFOQueue(1),
+		},
+	)
+	if err != nil {
+		panic(err)
+	}
 	pool := jobq.NewWorkerPool(q, 5)
 	defer pool.Close()
 
@@ -33,7 +40,7 @@ func main() {
 	ctx = context.WithValue(ctx, helloTo, "World")
 	defer cancel()
 
-	fut, err := q.EnqueueTask(ctx, &HelloTask{})
+	fut, err := q.EnqueueJob(&jobq.JobOptions{Task: &HelloTask{}, Ctx: ctx})
 	if err != nil {
 		panic(err)
 	}

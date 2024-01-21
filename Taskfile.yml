@@ -51,12 +51,23 @@ tasks:
   test-lib:
     desc: Run Go tests
     cmds:
-      - go test ./...
+      - go test -race -cover -coverprofile=coverage.out ./...
+
+  benchmark:
+    desc: Run Go benchmarks
+    cmds:
+      - go test -bench=. ./...
+
+  view-coverage:
+    desc: View test coverage
+    cmds:
+      - go tool cover -func=coverage.out
 
   test:
     desc: Run all tests
     cmds:
-      - task: test
+      - task: test-lib
+      - task: view-coverage
 
   clean:
     desc: Clean build artifacts
