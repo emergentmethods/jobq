@@ -5,7 +5,7 @@ import (
 )
 
 type Task interface {
-	Execute() (interface{}, error)
+	Execute(context.Context) (interface{}, error)
 }
 
 type Job struct {
@@ -27,7 +27,7 @@ func (j Job) Run() {
 
 	go func() {
 		defer close(done)
-		result, err := j.Task.Execute()
+		result, err := j.Task.Execute(j.ctx)
 		j.Future.SetResult(result, err)
 	}()
 

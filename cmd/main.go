@@ -8,11 +8,16 @@ import (
 	"gitlab.com/emergentmethods/jobq"
 )
 
+type HelloTo string
+
+var helloTo HelloTo
+
 type HelloTask struct{}
 
-func (t *HelloTask) Execute() (interface{}, error) {
+func (t *HelloTask) Execute(ctx context.Context) (interface{}, error) {
 	time.Sleep(2 * time.Second)
-	return "Hello, People!", nil
+	to := ctx.Value(helloTo).(string)
+	return fmt.Sprintf("Hello, %s!", to), nil
 }
 
 func main() {
@@ -21,7 +26,11 @@ func main() {
 	pool := jobq.NewWorkerPool(q, 5)
 	defer pool.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		3*time.Second,
+	)
+	ctx = context.WithValue(ctx, helloTo, "World")
 	defer cancel()
 
 	fut, err := q.EnqueueTask(ctx, &HelloTask{})
