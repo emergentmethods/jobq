@@ -16,6 +16,11 @@ tasks:
         then
             go install github.com/caarlos0/svu@latest &> /dev/null
         fi
+      - |
+        if ! command -v git-chglog &> /dev/null
+        then
+            go install github.com/git-chglog/git-chglog/cmd/git-chglog@latest &> /dev/null
+        fi
 
   run:
     desc: Run the application
@@ -46,6 +51,9 @@ tasks:
           exit 1
         fi
         git tag $next_version -m "chore(release): Release $next_version"
+        git-chglog -o CHANGELOG.md
+        git add CHANGELOG.md
+        git commit -m "chore(release): Release $next_version"
         exit 0    
 
   test-lib:
