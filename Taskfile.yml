@@ -1,0 +1,69 @@
+version: '3'
+
+silent: true
+
+tasks:
+  install-devtools:
+    desc: Install devtools if they are not already installed
+    cmds:
+      - |
+        if ! command -v golint &> /dev/null
+        then
+            go install golang.org/x/lint/golint@latest &> /dev/null
+        fi
+      - |
+        if ! command -v svu &> /dev/null
+        then
+            go install github.com/caarlos0/svu@latest &> /dev/null
+        fi
+
+  run:
+    desc: Run the application
+    cmds:
+      - go run ./... {{.CLI_ARGS}}
+
+  lint:
+    desc: Run linters
+    deps: [install-devtools]
+    cmds:
+      - golint ./...
+
+  version:
+    desc: Print the version
+    deps: [install-devtools]
+    cmds:
+      - svu current | sed 's/^v//'
+
+  bump-version:
+    desc: Bump the version
+    deps: [install-devtools]
+    cmds:
+      - |
+        current_version=$(svu current | sed 's/^v//')
+        next_version=$(svu next | sed 's/^v//')
+        if [ "$current_version" == "$next_version" ]; then
+          echo "No new version found, skipping bump"
+          exit 1
+        fi
+        git tag $next_version -m "chore(release): Release $next_version"
+        exit 0    
+
+  test-lib:
+    desc: Run Go tests
+    cmds:
+      - go test ./...
+
+  test:
+    desc: Run all tests
+    cmds:
+      - task: test
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf ./bin
+
+  all: 
+    desc: Run all components
+    cmds:
+      - task: test
