@@ -50,10 +50,10 @@ tasks:
           echo "No new version found, skipping bump"
           exit 1
         fi
-        git tag "v$next_version" -m "chore(release): Release $next_version"
         git-chglog -o CHANGELOG.md
         git add CHANGELOG.md
         git commit -m "chore(release): Release $next_version"
+        git tag "v$next_version" -m "chore(release): Release $next_version"
         exit 0    
 
   test-lib:

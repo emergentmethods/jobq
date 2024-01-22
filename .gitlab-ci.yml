@@ -212,5 +212,5 @@ make-release:
     - echo "Building release $VERSION"
   release:
     name: Release $VERSION
-    tag_name: $VERSION
+    tag_name: "v$VERSION"
     description: $CHANGELOG
