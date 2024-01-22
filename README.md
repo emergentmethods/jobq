@@ -64,17 +64,24 @@ func main() {
     // for the maximum amount of retries means the task will only be attempted once.
     // This allows us to cancel the task via the context and specify how many times it 
     // should be retried if it fails.
-    future, _ := queue.EnqueueJob(&jobq.JobOptions{
+    future, err := queue.EnqueueJob(&jobq.JobOptions{
         Task: &MyTask{},
         Ctx: context.WithTimeout(3*time.Second),
         MaxRetries: 2,
         ID: uuid.New(),
     })
+    if err != nil {
+        panic(err)
+    }
 
     // Optionally, wait for the result. This is a blocking operation,
     // and will wait until the job is processed.
-    result, _ := future.Result()
-    fmt.Println("Job result:", result)
+    result, err := future.Result()
+    if err != nil {
+        fmt.Println("Job failed:", err)
+    } else {
+        fmt.Println("Job result:", result)
+    }
 }
 ```
 
